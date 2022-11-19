@@ -1,3 +1,5 @@
+import { Enrollment, Payment, TicketStatus, TicketType } from "@prisma/client";
+
 export type ApplicationError = {
   name: string;
   message: string;
