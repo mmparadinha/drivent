@@ -10,8 +10,8 @@ async function getAllTicketTypes() {
   return ticketTypes;
 }
 
-function isUserEnrolled(userId: number) {
-  const userEnrollment = ticketRepository.findUserEnrollmentId(userId);
+async function isUserEnrolled(userId: number) {
+  const userEnrollment = await ticketRepository.findUserEnrollmentId(userId);
   if (!userEnrollment) throw notFoundError();
 
   return userEnrollment;

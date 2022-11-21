@@ -1,5 +1,5 @@
 import { AuthenticatedRequest } from "@/middlewares";
-import ticketsService from "@/services/tickets-service";
+import ticketsService, { TicketTypeId } from "@/services/tickets-service";
 import { Response } from "express";
 import httpStatus from "http-status";
 
@@ -15,7 +15,7 @@ export async function getTicketsTypes(req: AuthenticatedRequest, res: Response) 
 
 export async function postCreateTicket(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
-  const { ticketTypeId } = req.body;
+  const { ticketTypeId } = req.body as TicketTypeId;
 
   try {
     const ticketInfo = await ticketsService.createTicket(ticketTypeId, userId);

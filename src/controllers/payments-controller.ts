@@ -1,29 +1,31 @@
-import { AuthenticatedRequest } from "@/middlewares";
-import enrollmentsService from "@/services/enrollments-service";
+import { AuthenticatedRequest, handleApplicationErrors } from "@/middlewares";
+import paymentsService, { TicketId } from "@/services/payments-service";
 import { Response } from "express";
 import httpStatus from "http-status";
 
 export async function getPaymentByTicketId(req: AuthenticatedRequest, res: Response) {
+  const { ticketId } = req.query as unknown as TicketId;
   const { userId } = req;
+  if (ticketId === undefined) return res.sendStatus(httpStatus.BAD_REQUEST);
 
   try {
-    const enrollmentWithAddress = await enrollmentsService.getOneWithAddressByUserId(userId);
-
-    return res.status(httpStatus.OK).send(enrollmentWithAddress);
+    const ticketPaymentInfo = await paymentsService.getUserTicketPayment(ticketId, userId);
+    return res.status(httpStatus.OK).send(ticketPaymentInfo);
   } catch (error) {
-    return res.sendStatus(httpStatus.NO_CONTENT);
+    return handleApplicationErrors(error, req, res);
   }
 }
 
 export async function postProcessPayment(req: AuthenticatedRequest, res: Response) {
-  try {
-    await enrollmentsService.createOrUpdateEnrollmentWithAddress({
-      ...req.body,
-      userId: req.userId,
-    });
+  const { ticketId, cardData } = req.body;
+  const { userId } = req;
+  if (!ticketId || !cardData) return res.sendStatus(httpStatus.BAD_REQUEST);
 
-    return res.sendStatus(httpStatus.OK);
+  try {
+    const processedPaymentConfirmation = await paymentsService.postProcessPayment(ticketId, cardData, userId);
+
+    return res.status(httpStatus.OK).send(processedPaymentConfirmation);
   } catch (error) {
-    return res.sendStatus(httpStatus.BAD_REQUEST);
+    return handleApplicationErrors(error, req, res);
   }
 }
