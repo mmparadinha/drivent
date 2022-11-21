@@ -1,10 +1,10 @@
 import { AuthenticatedRequest, handleApplicationErrors } from "@/middlewares";
-import paymentsService, { TicketId } from "@/services/payments-service";
+import paymentsService, { PostPayment } from "@/services/payments-service";
 import { Response } from "express";
 import httpStatus from "http-status";
 
 export async function getPaymentByTicketId(req: AuthenticatedRequest, res: Response) {
-  const { ticketId } = req.query as unknown as TicketId;
+  const { ticketId } = req.query as unknown as RequestQuery;
   const { userId } = req;
   if (ticketId === undefined) return res.sendStatus(httpStatus.BAD_REQUEST);
 
@@ -17,7 +17,7 @@ export async function getPaymentByTicketId(req: AuthenticatedRequest, res: Respo
 }
 
 export async function postProcessPayment(req: AuthenticatedRequest, res: Response) {
-  const { ticketId, cardData } = req.body;
+  const { ticketId, cardData } = req.body as PostPayment;
   const { userId } = req;
   if (!ticketId || !cardData) return res.sendStatus(httpStatus.BAD_REQUEST);
 
@@ -28,4 +28,8 @@ export async function postProcessPayment(req: AuthenticatedRequest, res: Respons
   } catch (error) {
     return handleApplicationErrors(error, req, res);
   }
+}
+
+interface RequestQuery {
+  ticketId: number;
 }

@@ -2,15 +2,16 @@ import { notFoundError, unauthorizedError } from "@/errors";
 import { cardData } from "@/protocols";
 import paymentRepository from "@/repositories/payment-repository";
 import ticketRepository from "@/repositories/ticket-repository";
+import { Enrollment, Payment } from "@prisma/client";
 
-async function isUserEnrolled(userId: number) {
+async function isUserEnrolled(userId: number): Promise<Enrollment> {
   const userEnrollment = await ticketRepository.findUserEnrollmentId(userId);
   if (!userEnrollment) throw notFoundError();
 
   return userEnrollment;
 }
 
-async function getUserTicketPayment(ticketId: number, userId: number) {
+async function getUserTicketPayment(ticketId: number, userId: number): Promise<Payment> {
   const userEnrollmentInfo = await isUserEnrolled(userId);
   const acessedTicket = await paymentRepository.findAcessedTicket(ticketId);
   if (!acessedTicket) throw notFoundError();
@@ -21,7 +22,7 @@ async function getUserTicketPayment(ticketId: number, userId: number) {
   return ticketPayment;
 }
 
-async function postProcessPayment(ticketId: number, cardData: cardData, userId: number) {
+async function postProcessPayment(ticketId: number, cardData: cardData, userId: number): Promise<Payment> {
   const userEnrollmentInfo = await isUserEnrolled(userId);
   const acessedTicket = await paymentRepository.findAcessedTicket(ticketId);
   if (!acessedTicket) throw notFoundError();
@@ -41,8 +42,15 @@ async function postProcessPayment(ticketId: number, cardData: cardData, userId: 
   return paymentInfo;
 }
 
-export type TicketId = {
-  ticketId: number
+export type PostPayment = {
+  ticketId: number,
+	cardData: {
+		issuer: string,
+    number: number,
+    name: string,
+    expirationDate: Date,
+    cvv: number
+	}
 };
 
 const paymentsService = {

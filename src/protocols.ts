@@ -1,5 +1,3 @@
-import { Enrollment, Payment, TicketStatus, TicketType } from "@prisma/client";
-
 export type ApplicationError = {
   name: string;
   message: string;
@@ -21,8 +19,7 @@ export type AddressEnrollment = {
   cidade: string,
   uf: string,
   error?: string
-
-}
+};
 
 export type RequestError = {
   status: number,
